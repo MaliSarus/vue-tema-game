@@ -125,8 +125,32 @@
 }
 
 .game-field .resource {
-  width: 29px;
-  height: 29px;
+  width: 50px;
+  height: 50px;
+  border-radius: 0;
+  border: none;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.resource_1{
+  background-image: url("./resource_1.svg");
+ }
+.resource_2{
+  background-image: url("./resource_2.svg");
+
+}
+.resource_3{
+  background-image: url("./resource_3.svg");
+
+}
+.resource_4{
+  background-image: url("./resource_4.svg");
+
+}
+.resource_5{
+  background-image: url("./resource_5.svg");
 }
 
 .game-field .player {
@@ -143,7 +167,21 @@
   font-weight: 600;
   font-size: 18px;
   z-index: 11;
-  background: black;
+}
+.player_1-4{
+  background: dodgerblue;
+}
+.player_5-8{
+  background: #2d8625;
+}
+.player_9-12{
+  background: #a01d2a;
+}
+.player_13-16{
+  background: #bf9e1b;
+}
+.player_17-20{
+  background: #701c52;
 }
 
 .game-controls {
@@ -347,7 +385,7 @@
   margin-bottom: 20px;
 }
 
-.players-form select {
+.players-form select, .players-form input{
   height: 30px;
   cursor: pointer;
   margin-top: 10px;

@@ -1,8 +1,8 @@
 <template>
     <div id="app">
-        <Modal :players.sync="players" :resources.sync="resources" :opened.sync="openModal"/>
+        <Modal :players.sync="players" :resources.sync="resources" :opened.sync="openModal"  :game-id="gameId"/>
         <Game v-if="loading !== true" :map="map" :players.sync="players" :resources.sync="resources"
-              :opened.sync="openModal" :admined="admined" @logout="logout"/>
+              :opened.sync="openModal" :admined="admined" @logout="logout" :game-id="gameId"/>
     </div>
 </template>
 
@@ -23,15 +23,16 @@
                 map: null,
                 openModal: false,
                 loading: true,
+                gameId: ''
             }
         },
         methods: {
-            firstFetch() {
+            firstFetch(gameId) {
                 axios
                     .get(
                         '/check.php', {
                             params: {
-                                game_id: 'R3obG8hy4O'
+                                game_id: gameId
                             }
                         }
                     )
@@ -49,12 +50,12 @@
                         this.loading = false;
                     });
             },
-            intervalFetch(){
+            intervalFetch(gameId){
                 axios
                     .get(
                         '/check.php', {
                             params: {
-                                game_id: 'R3obG8hy4O'
+                                game_id: gameId
                             }
                         }
                     )
@@ -76,14 +77,22 @@
                 this.admined = false;
                 const vue = this
                 window.checkInterval = setInterval(function (){
-                    vue.intervalFetch();
+                    vue.intervalFetch(this.gameId);
                 }, 5000)
             }
         },
         created() {
+            if (window.location.search !== "") {
+                var query = new URLSearchParams(window.location.search);
+                for (var param of query.entries()) {
+                    if (param[0] === "game_id") {
+                        this.gameId= param[1];
+                    }
+                }
+            }
             let lsAdmin = localStorage.getItem('is_admin');
             let expirationDate = localStorage.getItem('adminExpiration');
-            this.firstFetch();
+            this.firstFetch(this.gameId);
             const vue = this;
             if (lsAdmin === 'true') {
                 if (new Date().getTime() > +expirationDate) {
@@ -91,7 +100,7 @@
                     localStorage.removeItem(('adminExpiration'));
                     this.admined = false;
                     window.checkInterval = setInterval(function (){
-                        vue.intervalFetch();
+                        vue.intervalFetch(this.gameId);
                     }, 5000)
                 } else {
                     this.admined = true;
@@ -100,7 +109,7 @@
             else {
                 this.admined = false;
                 window.checkInterval = setInterval(function (){
-                    vue.intervalFetch();
+                    vue.intervalFetch(this.gameId);
                 }, 5000)
             }
         }

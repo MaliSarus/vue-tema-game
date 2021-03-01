@@ -16,6 +16,13 @@
                         }"
                         v-draggabilly-on:dragEnd="()=>dragEnd('player',index)"
                         v-draggabilly-on:staticClick="()=>staticClick('player', index)"
+                        :class="{
+                            'player_1-4': player.number >= 1 && player.number <= 4,
+                            'player_5-8': player.number >= 5 && player.number <= 8,
+                            'player_9-12': player.number >= 9 && player.number <= 12,
+                            'player_13-16': player.number >= 13 && player.number <= 16,
+                            'player_17-20': player.number >= 17 && player.number <= 20
+                        }"
                 >
                     {{player.number}}
                 </div>
@@ -27,10 +34,10 @@
                         ref="resource"
                         v-draggabilly="{containment: true}"
                         :style="{
-                            backgroundColor: resource.color,
                             left: resource.position.left,
                             top: resource.position.top
                         }"
+                        :class="`resource_${resource.color}`"
                         v-draggabilly-on:dragEnd="()=>dragEnd('resource',index)"
                         v-draggabilly-on:staticClick="()=>staticClick('resource', index)"
                 />
@@ -45,6 +52,13 @@
                             left: player.position.left,
                             top: player.position.top
                         }"
+                        :class="{
+                            'player_1-4': player.number >= 1 && player.number <= 4,
+                            'player_5-8': player.number >= 5 && player.number <= 8,
+                            'player_9-12': player.number >= 9 && player.number <= 12,
+                            'player_13-16': player.number >= 13 && player.number <= 16,
+                            'player_17-20': player.number >= 17 && player.number <= 20
+                        }"
                 >
                     {{player.number}}
                 </div>
@@ -53,8 +67,8 @@
                         class="resource resource_static"
                         :key="'resource_static_' + index"
                         :data-index="index"
+                        :class="`resource_${resource.color}`"
                         :style="{
-                            backgroundColor: resource.color,
                             left: resource.position.left,
                             top: resource.position.top
                         }"
@@ -72,7 +86,7 @@
 
         <div v-else class="game-controls active">
             <button class="call-modal" @click="openModal">Добавить</button>
-            <button class="clear">Очистить</button>
+            <button class="clear" @click="clearField">Очистить</button>
             <button class="logout" @click="logout">Выйти из режима ведущего</button>
         </div>
     </main>
@@ -80,10 +94,11 @@
 
 <script>
     import axios from "axios";
+    import {sendData} from "@/helpers/data-transfer";
 
     export default {
         name: "Game",
-        props: ['map', 'players', 'resources', 'opened', 'admined'],
+        props: ['map', 'players', 'resources', 'opened', 'admined', 'gameId'],
         data() {
             return {
                 loading: false,
@@ -132,31 +147,11 @@
                 }
             },
 
-            sendData() {
-                const game_id = 'R3obG8hy4O';
-                let content = {
-                    players: this.playersData,
-                    resources: this.resources,
-                }
-                content = JSON.stringify(content)
-                content = content.replace(/\s+/g, '');
-                var fd = new FormData();
-                fd.append('game_id', game_id);
-                fd.append('content', content);
-
-                axios
-                    .post(
-                        '/update.php', fd, {
-                            transformRequest: (req) => {
-                                return req;
-                            },
-                        }
-                    )
-                    .then(response => {
-                        console.log(response)
-                    });
+            clearField(){
+                this.playersData = [];
+                this.resourcesData = [];
+                sendData(this.gameId,[], [])
             },
-
             staticClick(type, index){
                 this.dbClickCounter += 1;
                 setTimeout(function () {
@@ -166,17 +161,19 @@
                     switch (type) {
                         case 'player': {
                             this.playersData.splice(index, 1);
+                            this.dbClickCounter = 0
                             break;
                         }
                         case 'resource': {
                             this.resourcesData.splice(index, 1);
+                            this.dbClickCounter = 0
                             break;
                         }
                         default:
                             break;
                     }
 
-                    this.sendData()
+                    sendData(this.gameId,this.playersData, this.resourcesData)
                 }
             },
 
@@ -225,7 +222,7 @@
                         break;
                 }
 
-                // this.sendData();
+                sendData(this.gameId,this.playersData, this.resourcesData)
             },
 
             openModal() {
